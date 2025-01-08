@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody _rb;
-    private Animator _animator;
+    [SerializeField] Animator _animator;
     [SerializeField] private float _slideSpeed = 10f;
     [SerializeField] private float _jumpForce = 10f;
     [SerializeField] private Transform[] _slidePositions;
@@ -13,7 +14,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        _animator = GetComponent<Animator>();
         _rb = GetComponent<Rigidbody>();
         if (_slidePositions.Length != 3)
         {
@@ -32,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_isGrounded) return;
         _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+        _animator.SetTrigger("Jumped");
     }
 
     private void SlideRight()
