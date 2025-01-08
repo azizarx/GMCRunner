@@ -5,7 +5,11 @@ using UnityEngine;
 public class PlaneScript : MonoBehaviour
 {
     public Material Mat;
-   
+    void Start()
+    { 
+        
+        Destroy(this.gameObject, 5f);
+    }
 
     private void ChangeMatColor()
     {
@@ -17,13 +21,5 @@ public class PlaneScript : MonoBehaviour
         B = UnityEngine.Random.Range(0f, 1f);
         Mat.SetColor("_Color", new Color(R, G, B));
     }
-
-    private void OnCollisionExit(Collision other)
-    {
-        if (other.gameObject.CompareTag("Player"))
-        {
-            Destroy(this.gameObject, 1f);
-        }
-        
-    }
+   
 }
