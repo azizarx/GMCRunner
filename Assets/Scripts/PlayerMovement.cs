@@ -1,76 +1,72 @@
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody _rb;
+    private Animator _animator;
     [SerializeField] private float _slideSpeed = 10f;
     [SerializeField] private float _jumpForce = 10f;
-    [SerializeField] private bool _isCrouching = false;
     [SerializeField] private Transform[] _slidePositions;
+    [SerializeField] private bool _isGrounded; 
     private int _currentPos = 2;
+    private bool _isSliding = false; 
 
     private void Start()
     {
+        _animator = GetComponent<Animator>();
         _rb = GetComponent<Rigidbody>();
+        if (_slidePositions.Length != 3)
+        {
+            Debug.LogError("SlidePositions array must contain exactly three elements.");
+        }
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            Jump();
-        }
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            //Crouch();
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            SlideLeft();
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            SlideRight();
-        }
+        if (Input.GetKeyDown(KeyCode.W)) Jump();
+        if (Input.GetKeyDown(KeyCode.D)) SlideLeft();
+        if (Input.GetKeyDown(KeyCode.A)) SlideRight();
     }
 
     private void Jump()
     {
+        if (!_isGrounded) return;
         _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
     }
 
     private void SlideRight()
     {
-        if(_currentPos == 3) return;
-        if (_currentPos == 2)
-        {
-            Vector3.MoveTowards(transform.position, _slidePositions[2].position, _slideSpeed * Time.deltaTime);
-        }
-
-        if (_currentPos == 1)
-        {
-            Vector3.MoveTowards(transform.position, _slidePositions[1].position, _slideSpeed * Time.deltaTime);
-        }
+        if (_currentPos == 3 || _isSliding) return;
+        _currentPos++;
+        StartCoroutine(SlideToPosition(_slidePositions[_currentPos - 1].position));
     }
+
     private void SlideLeft()
     {
-        if(_currentPos == 1) return;
-        if (_currentPos == 3)
-        {
-            Vector3.MoveTowards(transform.position, _slidePositions[1].position, _slideSpeed * Time.deltaTime);
-        }
-
-        if (_currentPos == 2)
-        {
-            Vector3.MoveTowards(transform.position, _slidePositions[0].position, _slideSpeed * Time.deltaTime);
-        }
+        if (_currentPos == 1 || _isSliding) return;
+        _currentPos--;
+        StartCoroutine(SlideToPosition(_slidePositions[_currentPos - 1].position));
     }
-    
-    
+
+    private System.Collections.IEnumerator SlideToPosition(Vector3 targetPosition)
+    {
+        _isSliding = true;
+        while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, _slideSpeed * Time.deltaTime);
+            yield return null;
+        }
+        transform.position = targetPosition;
+        _isSliding = false;
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("Ground")) _isGrounded = true;
+    }
+
+    private void OnCollisionExit(Collision other)
+    {
+        if (other.gameObject.CompareTag("Ground")) _isGrounded = false;
+    }
 }

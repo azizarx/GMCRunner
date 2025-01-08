@@ -7,7 +7,7 @@ public class PlaneScript : MonoBehaviour
     public Material Mat;
     void Start()
     { 
-        InvokeRepeating("ChangeMatColor",1f,0.5f);
+        
         Destroy(this.gameObject, 5f);
     }
 
